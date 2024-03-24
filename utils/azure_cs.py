@@ -25,3 +25,31 @@ class AzureSpeechToText:
             if cancellation_details.reason == speechsdk.CancellationReason.Error:
                 print("Error details: {}".format(cancellation_details.error_details))
         return None
+    
+    
+    def generate_speech(self, text):
+        if not isinstance(text, str):
+            print(text)
+            # text = str(text)
+        
+        speech_config = speechsdk.SpeechConfig(subscription=self.subscription_key, region=self.service_region)
+        audio_config = speechsdk.audio.AudioOutputConfig(use_default_speaker=True) # type: ignore
+        
+        # NOTE https://learn.microsoft.com/en-us/azure/ai-services/speech-service/language-support?tabs=tts#prebuilt-neural-voices
+        # speech_config.speech_synthesis_voice_name='en-US-AvaMultilingualNeural'
+        # speech_config.speech_synthesis_voice_name='en-IN-PrabhatNeural'
+        speech_config.speech_synthesis_voice_name='en-IN-NeerjaNeural'
+        
+        speech_synthesizer = speechsdk.SpeechSynthesizer(speech_config=speech_config, audio_config=audio_config)\
+    
+        speech_synthesis_result = speech_synthesizer.speak_text(text)
+        if speech_synthesis_result.reason == speechsdk.ResultReason.SynthesizingAudioCompleted:
+            print("Speech synthesized for text [{}]".format(text))
+        elif speech_synthesis_result.reason == speechsdk.ResultReason.Canceled:
+            cancellation_details = speech_synthesis_result.cancellation_details
+            print("Speech synthesis canceled: {}".format(cancellation_details.reason))
+            if cancellation_details.reason == speechsdk.CancellationReason.Error:
+                if cancellation_details.error_details:
+                    print("Error details: {}".format(cancellation_details.error_details))
+                    print("Did you set the speech resource key and region values?")
+        

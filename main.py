@@ -2,6 +2,7 @@ import os
 import logging
 from dotenv import load_dotenv
 import pyaudio
+from playsound import playsound
 
 from utils.audio import PyAudioManager
 from utils.azure_cs import AzureSpeechToText
@@ -52,6 +53,7 @@ def main():
             is_detected = wakeword.detect_wake_word(data)
             logging.debug(is_detected)
             if is_detected:
+                playsound("./assets/ping.mp3")
                 text = azure_cs.recognize_from_microphone()
                 logging.debug(text)
 
@@ -62,9 +64,12 @@ def main():
             if text.lower().replace(".", " ").strip() == "stop":
                 break
 
-            print(f"User: {text}")
-            reply = assistant.send_message(text)
-            print(f"Assistant: {present_message(reply)}")
+            if text is not None:
+                print(f"User: {text}")
+                reply = assistant.send_message(text)
+                present_message(reply)
+                if reply.content[0].type == "text":
+                    azure_cs.generate_speech(reply.content[0].text.value)
 
         except OSError as e:
             print(f"Overflow error: {e}")

@@ -23,7 +23,7 @@ class Assistant:
 
     def list_messages(self):
         _messages = self.client.beta.threads.messages.list(thread_id=self.thread_id)
-        logging.debug(_messages.data)
+        # logging.debug(_messages.data)
         return _messages.data
 
     def send_message(self, message):
